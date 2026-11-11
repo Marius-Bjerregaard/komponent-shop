@@ -55,7 +55,7 @@
  "cabinets": [
   {
    "id": "ttl2-top",
-   "name": "7400 TTL · del 2",
+   "name": "7400 TTL",
    "x": 0,
    "y": 0,
    "rows": 12,
@@ -64,7 +64,7 @@
   },
   {
    "id": "ttl2-bund",
-   "name": "7400 TTL · del 2 (nederst)",
+   "name": "7400 TTL (nederst)",
    "x": 0,
    "y": 1,
    "rows": 12,
@@ -73,7 +73,7 @@
   },
   {
    "id": "ttl1-top",
-   "name": "7400 TTL · del 1",
+   "name": "7400 TTL",
    "x": 1,
    "y": 0,
    "rows": 12,
@@ -82,7 +82,7 @@
   },
   {
    "id": "ttl1-bund",
-   "name": "7400 TTL · del 1 (nederst)",
+   "name": "7400 TTL (nederst)",
    "x": 1,
    "y": 1,
    "rows": 12,
@@ -91,7 +91,7 @@
   },
   {
    "id": "hc-top",
-   "name": "7400 CMOS · del 1",
+   "name": "7400 CMOS",
    "x": 2,
    "y": 0,
    "rows": 12,
@@ -100,7 +100,7 @@
   },
   {
    "id": "hc-bund",
-   "name": "7400 CMOS · del 2",
+   "name": "7400 CMOS",
    "x": 2,
    "y": 1,
    "rows": 12,
@@ -109,7 +109,7 @@
   },
   {
    "id": "4000-top",
-   "name": "4000 CMOS · del 1",
+   "name": "4000 CMOS",
    "x": 3,
    "y": 0,
    "rows": 12,
@@ -118,7 +118,7 @@
   },
   {
    "id": "4000-bund",
-   "name": "4000 CMOS · del 2",
+   "name": "4000 CMOS",
    "x": 3,
    "y": 1,
    "rows": 12,
@@ -163,7 +163,7 @@
   },
   {
    "id": "tr-top",
-   "name": "Transistorer · del 1",
+   "name": "Transistorer",
    "x": 6,
    "y": 0,
    "rows": 12,
@@ -172,7 +172,7 @@
   },
   {
    "id": "tr-bund",
-   "name": "Transistorer · del 2",
+   "name": "Transistorer",
    "x": 6,
    "y": 1,
    "rows": 12,
