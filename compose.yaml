@@ -1,8 +1,8 @@
 # Indsæt denne i Dockge (+ Compose). Image bygges automatisk af GitHub Actions.
-# Ret OWNER til dit GitHub-brugernavn (små bogstaver).
+# Image: ghcr.io/marius-bjerregaard/komponent-shop
 services:
   komponenter:
-    image: ghcr.io/OWNER/komponent-shop:latest
+    image: ghcr.io/marius-bjerregaard/komponent-shop:latest
     container_name: komponenter
     restart: unless-stopped
     ports:
