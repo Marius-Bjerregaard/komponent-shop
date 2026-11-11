@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Komponenter</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f1a33">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Komponenter">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#f4f5f8;--card:#fff;--fg:#151a24;--mut:#6b7280;--line:#e3e6ec;--acc:#1f3b8a}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--card:#161b24;--fg:#e8ebf1;--mut:#8b93a3;--line:#262d3a;--acc:#7aa2ff}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:5;background:#0f1a33;color:#fff;padding:calc(env(safe-area-inset-top) + 10px) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left))}
+.top{display:flex;align-items:center;gap:10px;max-width:1100px;margin:auto}
+h1{font-size:18px;margin:0;flex:1}
+.tabs button{background:none;border:1px solid #ffffff40;color:#fff;border-radius:8px;padding:6px 12px;font-size:14px}
+.tabs button.on{background:#fff;color:#0f1a33}
+#q{display:block;width:100%;max-width:1100px;margin:10px auto 0;font-size:17px;padding:11px 14px;border-radius:10px;border:0;outline:none}
+main{max-width:1100px;margin:auto;padding:12px max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 30px) max(16px,env(safe-area-inset-left))}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:6px 12px;font-size:14px;white-space:nowrap}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+h2{font-size:15px;margin:18px 0 6px;display:flex;align-items:center}
+h3{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin:12px 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.c{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--col);border-radius:10px;padding:9px 11px}
+.c b{font-size:16px}.c p{margin:2px 0 0;font-size:13px;color:var(--mut)}
+.c small{display:block;margin-top:4px;font-size:12px;color:var(--mut)}
+.count{color:var(--mut);font-size:13px;margin:6px 0}
+.shelf{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.shelf img{width:100%;display:block}.shelf div{padding:10px 12px;font-weight:600}
+.shelves{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.num{display:inline-block;min-width:28px;text-align:center;background:var(--acc);color:#fff;border-radius:6px;margin-right:8px;font-size:13px;padding:1px 6px}
+</style>
+</head>
+<body>
+<header>
+ <div class="top"><h1>🔌 Komponenter</h1><div class="tabs"><button id="tLib" class="on">Bibliotek</button> <button id="tShelf">Reoler</button></div></div>
+ <input id="q" type="search" placeholder="Søg fx 74HC595, NPN, op amp, 5V…" autocomplete="off" autocapitalize="off" spellcheck="false">
+</header>
+<main>
+ <div id="lib"><div class="chips" id="series"></div><div class="chips" id="funcs"></div><div class="count" id="count"></div><div id="list"></div></div>
+ <div id="shelf" hidden><div class="shelves" id="shelves"></div></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let series=[],comps=[],selS='',selF='';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function load(){
+  series=await (await fetch('api/series')).json();
+  comps=await (await fetch('api/components?limit=100000')).json();
+  render();
+}
+function norm(s){return String(s??'').toLowerCase().replace(/[\s\-_.]/g,'')}
+function render(){
+  $('series').innerHTML=`<button class="chip ${selS?'':'on'}" data-s="">Alle</button>`+series.map(s=>`<button class="chip ${selS==s.id?'on':''}" data-s="${s.id}"><span class="dot" style="background:${s.color}"></span>${esc(s.name)} (${s.count})</button>`).join('');
+  const cur=series.find(s=>s.id==selS);
+  $('funcs').innerHTML=cur?`<button class="chip ${selF?'':'on'}" data-f="">Alle funktioner</button>`+cur.functions.map(f=>`<button class="chip ${selF==f?'on':''}" data-f="${esc(f)}">${esc(f)}</button>`).join(''):'';
+  const terms=$('q').value.toLowerCase().split(/\s+/).filter(Boolean);
+  const sname=id=>(series.find(s=>s.id==id)||{}).name||id;
+  const res=comps.filter(c=>(!selS||c.series==selS)&&(!selF||c.function==selF)&&terms.every(t=>{const h=[c.part,c.description,c.function,c.notes,c.location,sname(c.series)].join(' ').toLowerCase();return h.includes(t)||norm(h).includes(norm(t))}));
+  $('count').textContent=res.length+' komponenter';
+  let html='';
+  for(const s of series){
+    const inS=res.filter(c=>c.series==s.id); if(!inS.length) continue;
+    html+=`<h2><span class="dot" style="background:${s.color}"></span>${esc(s.name)}</h2>`;
+    const fns=[...new Set(inS.map(c=>c.function))].sort();
+    for(const f of fns){
+      html+=`<h3>${esc(f)}</h3><div class="grid">`+inS.filter(c=>c.function==f).map(c=>`<div class="c" style="--col:${s.color}"><b>${esc(c.part)}</b>${c.description?`<p>${esc(c.description)}</p>`:''}<small>${esc(c.location)}${c.quantity!=null?' · '+c.quantity+' stk':''}${c.notes?' · '+esc(c.notes):''}</small></div>`).join('')+'</div>';
+    }
+  }
+  $('list').innerHTML=html||'<p class="count">Ingen resultater.</p>';
+}
+$('series').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;selS=b.dataset.s;selF='';render()};
+$('funcs').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;selF=b.dataset.f;render()};
+$('q').oninput=render;
+async function shelves(){
+  const l=await (await fetch('api/shelves')).json();
+  $('shelves').innerHTML=l.map(s=>`<div class="shelf"><img loading="lazy" src="${s.file}" alt=""><div>${s.number!=null&&s.number>0?`<span class="num">${s.number}</span>`:''}${esc(s.title)}</div></div>`).join('');
+}
+function tab(lib){$('lib').hidden=!lib;$('shelf').hidden=lib;$('q').hidden=!lib;$('tLib').classList.toggle('on',lib);$('tShelf').classList.toggle('on',!lib);if(!lib)shelves()}
+$('tLib').onclick=()=>tab(true);$('tShelf').onclick=()=>tab(false);
+load();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
