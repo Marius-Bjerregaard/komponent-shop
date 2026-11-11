@@ -13,82 +13,133 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
-:root{--bg:#f4f5f8;--card:#fff;--fg:#151a24;--mut:#6b7280;--line:#e3e6ec;--acc:#1f3b8a}
-@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--card:#161b24;--fg:#e8ebf1;--mut:#8b93a3;--line:#262d3a;--acc:#7aa2ff}}
+:root{--bg:#f4f5f8;--card:#fff;--fg:#151a24;--mut:#6b7280;--line:#e3e6ec;--acc:#1f3b8a;--frame:#1a2547;--drawer:#eef0f4}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--card:#161b24;--fg:#e8ebf1;--mut:#8b93a3;--line:#262d3a;--acc:#7aa2ff;--frame:#0b1228;--drawer:#1d2430}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 header{position:sticky;top:0;z-index:5;background:#0f1a33;color:#fff;padding:calc(env(safe-area-inset-top) + 10px) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left))}
-.top{display:flex;align-items:center;gap:10px;max-width:1100px;margin:auto}
-h1{font-size:18px;margin:0;flex:1}
-.tabs button{background:none;border:1px solid #ffffff40;color:#fff;border-radius:8px;padding:6px 12px;font-size:14px}
+.top{display:flex;align-items:center;gap:10px}
+h1{font-size:18px;margin:0;flex:1;white-space:nowrap}
+.tabs{display:flex;gap:4px}
+.tabs button{background:none;border:1px solid #ffffff40;color:#fff;border-radius:8px;padding:6px 10px;font-size:14px}
 .tabs button.on{background:#fff;color:#0f1a33}
-#q{display:block;width:100%;max-width:1100px;margin:10px auto 0;font-size:17px;padding:11px 14px;border-radius:10px;border:0;outline:none}
-main{max-width:1100px;margin:auto;padding:12px max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 30px) max(16px,env(safe-area-inset-left))}
+#q{display:block;width:100%;margin:10px 0 0;font-size:17px;padding:11px 14px;border-radius:10px;border:0;outline:none}
+main{padding:12px max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 30px) max(16px,env(safe-area-inset-left))}
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:6px 12px;font-size:14px;white-space:nowrap}
 .chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.count{color:var(--mut);font-size:13px;margin:6px 0}
+/* reol-model */
+.wall{display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x proximity;margin:0 -16px;padding-left:16px;padding-right:16px}
+.colm{flex:none;display:flex;flex-direction:column;gap:10px;scroll-snap-align:center}
+.cab{background:var(--frame);border-radius:8px;padding:6px;width:calc(var(--n) * 76px + 12px)}
+.cab h4{margin:0 0 6px;font-size:12px;text-align:center;border-radius:4px;padding:3px 4px;background:var(--col,#555);color:#fff;text-shadow:0 1px 2px #0008;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px}
+.d{height:34px;border-radius:4px;background:var(--drawer);border:0;border-top:11px solid var(--col);color:var(--fg);font:700 10.5px/1 -apple-system,"Segoe UI",sans-serif;padding:0 1px;overflow:hidden;cursor:pointer;word-break:break-all}
+.d.e{display:grid;place-items:center;border-top:0;background:transparent;outline:1px dashed #ffffff30;outline-offset:-1px;color:#ffffff45;font-weight:400;cursor:default}
+.wall.f .d:not(.hit){opacity:.13}
+.wall.f .d.hit{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--col)}
+/* liste */
 h2{font-size:15px;margin:18px 0 6px;display:flex;align-items:center}
 h3{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin:12px 0 6px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
 .c{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--col);border-radius:10px;padding:9px 11px}
 .c b{font-size:16px}.c p{margin:2px 0 0;font-size:13px;color:var(--mut)}
 .c small{display:block;margin-top:4px;font-size:12px;color:var(--mut)}
-.count{color:var(--mut);font-size:13px;margin:6px 0}
-.shelf{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.shelf{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .shelf img{width:100%;display:block}.shelf div{padding:10px 12px;font-weight:600}
 .shelves{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .num{display:inline-block;min-width:28px;text-align:center;background:var(--acc);color:#fff;border-radius:6px;margin-right:8px;font-size:13px;padding:1px 6px}
+dialog{border:0;border-radius:14px;padding:18px 20px;max-width:min(420px,92vw);width:100%;background:var(--card);color:var(--fg);border-top:8px solid var(--col)}
+dialog::backdrop{background:#0008}
+dialog h2{margin:0 0 4px;font-size:22px}dialog p{margin:6px 0}dialog .m{color:var(--mut);font-size:14px}
+dialog button{margin-top:12px;width:100%;padding:10px;border-radius:10px;border:0;background:var(--acc);color:#fff;font-size:16px}
 </style>
 </head>
 <body>
 <header>
- <div class="top"><h1>🔌 Komponenter</h1><div class="tabs"><button id="tLib" class="on">Bibliotek</button> <button id="tShelf">Reoler</button></div></div>
+ <div class="top"><h1>🔌 Komponenter</h1><div class="tabs"><button data-t="wall" class="on">Reol</button><button data-t="lib">Liste</button><button data-t="shelf">Billeder</button></div></div>
  <input id="q" type="search" placeholder="Søg fx 74HC595, NPN, op amp, 5V…" autocomplete="off" autocapitalize="off" spellcheck="false">
 </header>
 <main>
- <div id="lib"><div class="chips" id="series"></div><div class="chips" id="funcs"></div><div class="count" id="count"></div><div id="list"></div></div>
+ <div id="filters"><div class="chips" id="series"></div><div class="chips" id="funcs"></div><div class="count" id="count"></div></div>
+ <div id="wall" class="wall"></div>
+ <div id="lib" hidden></div>
  <div id="shelf" hidden><div class="shelves" id="shelves"></div></div>
 </main>
+<dialog id="dlg"></dialog>
 <script>
 const $=id=>document.getElementById(id);
-let series=[],comps=[],selS='',selF='';
+let series=[],comps=[],cabs=[],selS='',selF='',tabNow='wall';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>String(s??'').toLowerCase().replace(/[\s\-_.]/g,'');
+const ser=id=>series.find(s=>s.id==id)||{name:id,color:'#667'};
 async function load(){
-  series=await (await fetch('api/series')).json();
-  comps=await (await fetch('api/components?limit=100000')).json();
+  [series,comps,cabs]=await Promise.all(['api/series','api/components?limit=100000','api/cabinets'].map(u=>fetch(u).then(r=>r.json())));
   render();
 }
-function norm(s){return String(s??'').toLowerCase().replace(/[\s\-_.]/g,'')}
+function matches(){
+  const terms=$('q').value.toLowerCase().split(/\s+/).filter(Boolean);
+  return comps.filter(c=>(!selS||c.series==selS)&&(!selF||c.function==selF)&&terms.every(t=>{const h=[c.part,c.description,c.function,c.notes,c.position,ser(c.series).name].join(' ').toLowerCase();return h.includes(t)||norm(h).includes(norm(t))}));
+}
 function render(){
   $('series').innerHTML=`<button class="chip ${selS?'':'on'}" data-s="">Alle</button>`+series.map(s=>`<button class="chip ${selS==s.id?'on':''}" data-s="${s.id}"><span class="dot" style="background:${s.color}"></span>${esc(s.name)} (${s.count})</button>`).join('');
   const cur=series.find(s=>s.id==selS);
   $('funcs').innerHTML=cur?`<button class="chip ${selF?'':'on'}" data-f="">Alle funktioner</button>`+cur.functions.map(f=>`<button class="chip ${selF==f?'on':''}" data-f="${esc(f)}">${esc(f)}</button>`).join(''):'';
-  const terms=$('q').value.toLowerCase().split(/\s+/).filter(Boolean);
-  const sname=id=>(series.find(s=>s.id==id)||{}).name||id;
-  const res=comps.filter(c=>(!selS||c.series==selS)&&(!selF||c.function==selF)&&terms.every(t=>{const h=[c.part,c.description,c.function,c.notes,c.location,sname(c.series)].join(' ').toLowerCase();return h.includes(t)||norm(h).includes(norm(t))}));
-  $('count').textContent=res.length+' komponenter';
+  const res=matches(), filtered=res.length!=comps.length;
+  $('count').textContent=res.length+' komponenter'+(tabNow=='wall'&&filtered?' · '+res.filter(c=>c.cabinet).length+' markeret i reolen':'');
+  if(tabNow=='wall') renderWall(res,filtered); else if(tabNow=='lib') renderList(res);
+}
+function renderWall(res,filtered){
+  const hit=new Set(res.map(c=>c.id)), at={};
+  for(const c of comps) if(c.cabinet) at[c.cabinet+'|'+c.row+'|'+c.col]=c;
+  const xs=[...new Set(cabs.map(k=>k.x))].sort((a,b)=>a-b);
+  $('wall').className='wall'+(filtered?' f':'');
+  $('wall').innerHTML=xs.map(x=>`<div class="colm">`+cabs.filter(k=>k.x==x).sort((a,b)=>a.y-b.y).map(k=>{
+    let cells='';
+    for(let r=1;r<=k.rows;r++) for(let c=1;c<=k.cols;c++){
+      const m=at[k.id+'|'+r+'|'+c];
+      cells+=m?`<button class="d${hit.has(m.id)?' hit':''}" data-id="${m.id}" style="--col:${ser(m.series).color}" title="${esc(m.description)}">${esc(m.part)}</button>`:`<div class="d e" title="Tom skuffe – række ${r}, skuffe ${c}">tom</div>`;
+    }
+    return `<div class="cab" style="--n:${k.cols};--col:${k.series?ser(k.series).color:'#555'}"><h4>${esc(k.name)}</h4><div class="g">${cells}</div></div>`;
+  }).join('')+`</div>`).join('');
+  if(filtered){const f=$('wall').querySelector('.hit');if(f)f.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}
+}
+function renderList(res){
   let html='';
   for(const s of series){
     const inS=res.filter(c=>c.series==s.id); if(!inS.length) continue;
     html+=`<h2><span class="dot" style="background:${s.color}"></span>${esc(s.name)}</h2>`;
-    const fns=[...new Set(inS.map(c=>c.function))].sort();
-    for(const f of fns){
-      html+=`<h3>${esc(f)}</h3><div class="grid">`+inS.filter(c=>c.function==f).map(c=>`<div class="c" style="--col:${s.color}"><b>${esc(c.part)}</b>${c.description?`<p>${esc(c.description)}</p>`:''}<small>${esc(c.location)}${c.quantity!=null?' · '+c.quantity+' stk':''}${c.notes?' · '+esc(c.notes):''}</small></div>`).join('')+'</div>';
+    for(const f of [...new Set(inS.map(c=>c.function))]){
+      html+=`<h3>${esc(f)}</h3><div class="grid">`+inS.filter(c=>c.function==f).map(c=>`<div class="c" style="--col:${s.color}"><b>${esc(c.part)}</b>${c.description?`<p>${esc(c.description)}</p>`:''}<small>${esc(c.position||'Ikke placeret')}${c.quantity!=null?' · '+c.quantity+' stk':''}${c.notes?' · '+esc(c.notes):''}</small></div>`).join('')+'</div>';
     }
   }
-  $('list').innerHTML=html||'<p class="count">Ingen resultater.</p>';
+  $('lib').innerHTML=html||'<p class="count">Ingen resultater.</p>';
 }
+$('wall').onclick=e=>{
+  const b=e.target.closest('[data-id]'); if(!b) return;
+  const c=comps.find(x=>x.id==b.dataset.id), s=ser(c.series), d=$('dlg');
+  d.style.setProperty('--col',s.color);
+  d.innerHTML=`<h2>${esc(c.part)}</h2><p>${esc(c.description)}</p><p class="m">${esc(s.name)} · ${esc(c.function)}</p><p class="m">📍 ${esc(c.position)}</p>${c.quantity!=null?`<p class="m">Antal: ${c.quantity}</p>`:''}${c.notes?`<p class="m">${esc(c.notes)}</p>`:''}<button>Luk</button>`;
+  d.showModal();
+};
+$('dlg').onclick=e=>{if(e.target.tagName=='BUTTON'||e.target==$('dlg'))$('dlg').close()};
 $('series').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;selS=b.dataset.s;selF='';render()};
 $('funcs').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;selF=b.dataset.f;render()};
 $('q').oninput=render;
 async function shelves(){
   const l=await (await fetch('api/shelves')).json();
-  $('shelves').innerHTML=l.map(s=>`<div class="shelf"><img loading="lazy" src="${s.file}" alt=""><div>${s.number!=null&&s.number>0?`<span class="num">${s.number}</span>`:''}${esc(s.title)}</div></div>`).join('');
+  $('shelves').innerHTML=l.map(s=>`<div class="shelf"><img loading="lazy" src="${s.file}" alt=""><div>${s.number?`<span class="num">${s.number}</span>`:''}${esc(s.title)}</div></div>`).join('');
 }
-function tab(lib){$('lib').hidden=!lib;$('shelf').hidden=lib;$('q').hidden=!lib;$('tLib').classList.toggle('on',lib);$('tShelf').classList.toggle('on',!lib);if(!lib)shelves()}
-$('tLib').onclick=()=>tab(true);$('tShelf').onclick=()=>tab(false);
+document.querySelector('.tabs').onclick=e=>{
+  const b=e.target.closest('[data-t]'); if(!b) return; tabNow=b.dataset.t;
+  for(const x of document.querySelectorAll('.tabs button')) x.classList.toggle('on',x==b);
+  $('wall').hidden=tabNow!='wall';$('lib').hidden=tabNow!='lib';$('shelf').hidden=tabNow!='shelf';
+  $('filters').hidden=$('q').hidden=tabNow=='shelf';
+  if(tabNow=='shelf') shelves(); else render();
+};
 load();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
