@@ -34,10 +34,10 @@ main{padding:12px max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-
 /* reol-model */
 .wall{display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x proximity;margin:0 -16px;padding-left:16px;padding-right:16px}
 .colm{flex:none;display:flex;flex-direction:column;gap:10px;scroll-snap-align:center}
-.cab{background:var(--frame);border-radius:8px;padding:6px;width:calc(var(--n) * 76px + 12px)}
+.cab{background:var(--frame);border-radius:8px;padding:6px;width:calc(5 * 76px + 12px);box-sizing:border-box}
 .cab h4{margin:0 0 6px;font-size:12px;text-align:center;border-radius:4px;padding:3px 4px;background:var(--col,#555);color:#fff;text-shadow:0 1px 2px #0008;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .g{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px}
-.d{height:34px;border-radius:4px;background:var(--drawer);border:0;border-top:11px solid var(--col);color:var(--fg);font:700 10.5px/1 -apple-system,"Segoe UI",sans-serif;padding:0 1px;overflow:hidden;cursor:pointer;word-break:break-all}
+.d{height:calc((12 * 34px + 11 * 3px - (var(--r,12) - 1) * 3px) / var(--r,12));border-radius:4px;background:var(--drawer);border:0;border-top:11px solid var(--col);color:var(--fg);font:700 10.5px/1 -apple-system,"Segoe UI",sans-serif;padding:0 1px;overflow:hidden;cursor:pointer;word-break:break-all}
 .d.e{display:grid;place-items:center;border-top:0;background:transparent;outline:1px dashed #ffffff30;outline-offset:-1px;color:#ffffff45;font-weight:400;cursor:default}
 .wall.f .d:not(.hit){opacity:.13}
 .wall.f .d.hit{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--col)}
@@ -103,7 +103,7 @@ function renderWall(res,filtered){
       const m=at[k.id+'|'+r+'|'+c];
       cells+=m?`<button class="d${hit.has(m.id)?' hit':''}" data-id="${m.id}" style="--col:${ser(m.series).color}" title="${esc(m.description)}">${esc(m.part)}</button>`:`<div class="d e" title="Tom skuffe – række ${r}, skuffe ${c}">tom</div>`;
     }
-    return `<div class="cab" style="--n:${k.cols};--col:${k.series?ser(k.series).color:'#555'}"><h4>${esc(k.name)}</h4><div class="g">${cells}</div></div>`;
+    return `<div class="cab" style="--n:${k.cols};--r:${k.rows};--col:${k.series?ser(k.series).color:'#555'}"><h4>${esc(k.name)}</h4><div class="g">${cells}</div></div>`;
   }).join('')+`</div>`).join('');
   if(filtered){const f=$('wall').querySelector('.hit');if(f)f.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}
 }
