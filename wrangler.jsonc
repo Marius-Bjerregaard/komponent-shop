@@ -1,0 +1,19 @@
+// Cloudflare Workers-opsætning. Deploy: npm run deploy (se README).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "komponent-shop",
+  "main": "src/worker.js",
+  "compatibility_date": "2025-11-01",
+  "build": { "command": "node scripts/build-shelves.mjs" },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/mcp"],
+    "not_found_handling": "single-page-application"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "LIBRARY", "class_name": "Library" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Library"] }],
+  "observability": { "enabled": true }
+}
