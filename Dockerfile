@@ -1,6 +1,6 @@
 FROM node:22-alpine
 WORKDIR /app
-COPY package.json server.js core.js seed.json ./
+COPY package.json server.js core.js seed.json datablade.json ./
 COPY public ./public
 ENV DATA_DIR=/data PORT=3000
 VOLUME /data

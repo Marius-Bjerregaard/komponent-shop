@@ -4,6 +4,7 @@
 import { DurableObject } from 'cloudflare:workers';
 import { createLibrary } from '../core.js';
 import seed from '../seed.json';
+import datasheets from '../datablade.json';
 import shelves from './shelves.json'; // genereres af scripts/build-shelves.mjs ved build
 
 const CHUNK = 400_000; // tegn pr. række (SQLite-rækker må højst fylde 2 MB)
@@ -16,7 +17,7 @@ export class Library extends DurableObject {
     const rows = this.sql.exec('SELECT v FROM db_chunks ORDER BY i').toArray();
     const fresh = !rows.length;
     const db = fresh ? structuredClone(seed) : JSON.parse(rows.map(r => r.v).join(''));
-    this.lib = createLibrary({ db, seed, save: d => this.save(d), listShelves: () => shelves });
+    this.lib = createLibrary({ db, seed, datasheets, save: d => this.save(d), listShelves: () => shelves });
     if (fresh) this.save(db);
     if (this.lib.migrate()) console.log('Database migreret til layout v' + seed.layoutVersion);
   }

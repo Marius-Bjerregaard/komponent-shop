@@ -14,9 +14,21 @@ export function shelvesFromFiles(files) {
     });
 }
 
+// Datablade: et eksplicit link på komponenten (feltet datasheet) vinder; ellers slås partnummeret
+// op i datablade.json ({ "<partnummer>": "url" | [{ title, url }] }).
+export function datasheetsFor(c, map = {}) {
+  if (c.datasheet) return [{ title: 'Datablad', url: c.datasheet }];
+  const v = map[norm(c.part)];
+  if (!v) return [];
+  return (Array.isArray(v) ? v : [v]).map((x, i) => typeof x === 'string' ? { title: i ? 'Datablad ' + (i + 1) : 'Datablad', url: x } : { title: x.title || 'Datablad', url: x.url });
+}
+const normMap = m => Object.fromEntries(Object.entries(m || {}).filter(([k]) => !k.startsWith('_')).map(([k, v]) => [norm(k), v]));
+
 // db: { layoutVersion, series, cabinets, components }
 // save(db): gemmer hele databasen. backup(db, version): valgfri kopi før migrering.
-export function createLibrary({ db, save, seed, listShelves, backup = () => {} }) {
+// datasheets: indholdet af datablade.json.
+export function createLibrary({ db, save, seed, listShelves, datasheets = {}, backup = () => {} }) {
+  const dsMap = normMap(datasheets);
   const persist = () => save(db);
 
   // Migrering: læg reol-layoutet fra seed.json ind i en eksisterende database (bevarer egne tilføjelser)
@@ -52,7 +64,7 @@ export function createLibrary({ db, save, seed, listShelves, backup = () => {} }
     const k = cabinet(c.cabinet);
     return k ? `${k.name} – række ${c.row}, skuffe ${c.col}` : (c.location || '');
   }
-  const view = c => ({ ...c, position: where(c) });
+  const view = c => ({ ...c, position: where(c), datasheets: datasheetsFor(c, dsMap) });
   // Tjekker at en skuffe findes og er ledig
   function checkSlot(cab, row, col, selfId) {
     const k = cabinet(cab);
@@ -74,26 +86,30 @@ export function createLibrary({ db, save, seed, listShelves, backup = () => {} }
     }).sort(byPos).slice(0, Number(limit) || 500).map(view);
   }
 
+  // Kun http(s)-links eller filer i public/datablade, så et link aldrig kan køre kode i browseren
+  const checkDatasheet = u => { if (u && !/^(https?:\/\/|datablade\/)/i.test(u)) throw new Error('datasheet skal starte med http://, https:// eller datablade/'); };
   function addComponent(c) {
     if (!c.part) throw new Error('part er påkrævet');
+    checkDatasheet(c.datasheet);
     if (!db.series.find(s => s.id === c.series)) throw new Error(`Ukendt serie "${c.series}". Brug list_series eller add_series.`);
     const id = Math.max(0, ...db.components.map(x => x.id)) + 1;
     if (c.cabinet) checkSlot(c.cabinet, c.row, c.col);
     const comp = { id, part: c.part, series: c.series, function: c.function || 'Andet', description: c.description || '',
       cabinet: c.cabinet || null, row: c.cabinet ? c.row : null, col: c.cabinet ? c.col : null,
-      location: c.location || '', quantity: c.quantity ?? null, notes: c.notes || '' };
+      location: c.location || '', quantity: c.quantity ?? null, notes: c.notes || '', datasheet: c.datasheet || '' };
     db.components.push(comp); persist(); return view(comp);
   }
   function updateComponent(id, patch) {
     const c = db.components.find(x => x.id === Number(id));
     if (!c) throw new Error('Komponent ikke fundet: ' + id);
     if (patch.series && !db.series.find(s => s.id === patch.series)) throw new Error('Ukendt serie');
+    checkDatasheet(patch.datasheet);
     if ('cabinet' in patch || 'row' in patch || 'col' in patch) {
       const cab = 'cabinet' in patch ? patch.cabinet : c.cabinet;
       if (cab) { const row = patch.row ?? c.row, col = patch.col ?? c.col; checkSlot(cab, row, col, c.id); c.cabinet = cab; c.row = row; c.col = col; }
       else { c.cabinet = null; c.row = null; c.col = null; } // cabinet: null = tag ud af reolen
     }
-    for (const k of ['part', 'series', 'function', 'description', 'location', 'quantity', 'notes']) if (k in patch) c[k] = patch[k];
+    for (const k of ['part', 'series', 'function', 'description', 'location', 'quantity', 'notes', 'datasheet']) if (k in patch) c[k] = patch[k];
     persist(); return view(c);
   }
   function deleteComponent(id) {
@@ -153,6 +169,7 @@ export function createLibrary({ db, save, seed, listShelves, backup = () => {} }
     const components = data.components.map(c => ({
       ...pick(c, ['id', 'part', 'series', 'function', 'description', 'cabinet', 'row', 'col', 'location', 'quantity', 'notes']),
       function: c.function || 'Andet', description: c.description || '', location: c.location || '', notes: c.notes || '',
+      datasheet: c.datasheet || '',
     }));
     const ids = new Set(components.map(c => c.id));
     if (ids.size !== components.length || components.some(c => !Number.isInteger(c.id))) throw new Error('Komponent-id mangler eller er ikke unikke');
@@ -164,19 +181,20 @@ export function createLibrary({ db, save, seed, listShelves, backup = () => {} }
 
   // ---------- MCP (Streamable HTTP, JSON-RPC) ----------
   const str = { type: 'string' }, num = { type: 'number' };
+  const dsProp = { type: 'string', description: 'URL til datablad (PDF). Tom streng = brug standardopslaget i datablade.json.' };
   const TOOLS = [
     { name: 'search_components', description: 'Søg i komponentbiblioteket (fritekst på partnummer, beskrivelse, funktion). Kan filtreres på serie-id og funktion.',
       inputSchema: { type: 'object', properties: { q: str, series: str, function: str, limit: { type: 'number' } } }, run: a => search(a) },
     { name: 'list_series', description: 'List alle serier med antal komponenter og funktioner (underkategorier).',
       inputSchema: { type: 'object', properties: {} }, run: () => listSeries() },
-    { name: 'add_component', description: 'Tilføj en komponent. series skal være et eksisterende serie-id. function er underkategorien (fx "Logiske gates", "Tællere", "BJT NPN"). Placering i reolen: cabinet (reol-id fra list_cabinets), row (række fra toppen, 1-baseret) og col (skuffe fra venstre, 1-baseret); skuffen skal være tom. Uden cabinet er komponenten uplaceret.',
-      inputSchema: { type: 'object', required: ['part', 'series'], properties: { part: str, series: str, function: str, description: str, cabinet: str, row: num, col: num, location: str, quantity: num, notes: str } },
+    { name: 'add_component', description: 'Tilføj en komponent. series skal være et eksisterende serie-id. function er underkategorien (fx "Logiske gates", "Tællere", "BJT NPN"). Placering i reolen: cabinet (reol-id fra list_cabinets), row (række fra toppen, 1-baseret) og col (skuffe fra venstre, 1-baseret); skuffen skal være tom. Uden cabinet er komponenten uplaceret. datasheet er et valgfrit link til databladet.',
+      inputSchema: { type: 'object', required: ['part', 'series'], properties: { part: str, series: str, function: str, description: str, cabinet: str, row: num, col: num, location: str, quantity: num, notes: str, datasheet: dsProp } },
       run: a => addComponent(a) },
     { name: 'add_components', description: 'Tilføj mange komponenter på én gang.',
       inputSchema: { type: 'object', required: ['components'], properties: { components: { type: 'array', items: { type: 'object' } } } },
       run: a => a.components.map(addComponent) },
     { name: 'update_component', description: 'Opdater felter på en komponent (via id). Flyt den ved at sætte cabinet/row/col; cabinet: null tager den ud af reolen.',
-      inputSchema: { type: 'object', required: ['id'], properties: { id: num, part: str, series: str, function: str, description: str, cabinet: { type: ['string', 'null'] }, row: num, col: num, location: str, quantity: num, notes: str } },
+      inputSchema: { type: 'object', required: ['id'], properties: { id: num, part: str, series: str, function: str, description: str, cabinet: { type: ['string', 'null'] }, row: num, col: num, location: str, quantity: num, notes: str, datasheet: dsProp } },
       run: ({ id, ...p }) => updateComponent(id, p) },
     { name: 'delete_component', description: 'Slet en komponent (via id).',
       inputSchema: { type: 'object', required: ['id'], properties: { id: { type: 'number' } } }, run: a => deleteComponent(a.id) },

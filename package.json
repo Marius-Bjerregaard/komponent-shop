@@ -6,7 +6,8 @@
     "start": "node server.js",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "flyt-data": "node scripts/flyt-data.mjs"
+    "flyt-data": "node scripts/flyt-data.mjs",
+    "opdater-datablade": "node scripts/opdater-datablade.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.164.0"

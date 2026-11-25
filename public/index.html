@@ -55,6 +55,9 @@ h3{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em
 dialog{border:0;border-radius:14px;padding:18px 20px;max-width:min(420px,92vw);width:100%;background:var(--card);color:var(--fg);border-top:8px solid var(--col)}
 dialog::backdrop{background:#0008}
 dialog h2{margin:0 0 4px;font-size:22px}dialog p{margin:6px 0}dialog .m{color:var(--mut);font-size:14px}
+dialog .ds{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+dialog .ds a{flex:1 1 auto;text-align:center;padding:9px 12px;border-radius:10px;border:1px solid var(--line);color:var(--acc);text-decoration:none;font-weight:600}
+.c a{color:var(--acc);text-decoration:none;font-weight:600}
 dialog button{margin-top:12px;width:100%;padding:10px;border-radius:10px;border:0;background:var(--acc);color:#fff;font-size:16px}
 </style>
 </head>
@@ -76,6 +79,9 @@ let series=[],comps=[],cabs=[],selS='',selF='',tabNow='wall';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const norm=s=>String(s??'').toLowerCase().replace(/[\s\-_.]/g,'');
 const ser=id=>series.find(s=>s.id==id)||{name:id,color:'#667'};
+// Datablade: kun http(s) og lokale filer i datablade/; ellers et søgelink
+const dsList=c=>(c.datasheets||[]).filter(d=>/^(https?:\/\/|datablade\/)/i.test(d.url));
+const dsLinks=c=>{const l=dsList(c);return l.length?l.map(d=>`<a href="${esc(d.url)}" target="_blank" rel="noopener">📄 ${esc(d.title)}</a>`).join(''):`<a href="https://www.google.com/search?q=${encodeURIComponent(c.part+' datasheet')}" target="_blank" rel="noopener">🔎 Søg datablad</a>`};
 async function load(){
   [series,comps,cabs]=await Promise.all(['api/series','api/components?limit=100000','api/cabinets'].map(u=>fetch(u).then(r=>r.json())));
   render();
@@ -113,7 +119,7 @@ function renderList(res){
     const inS=res.filter(c=>c.series==s.id); if(!inS.length) continue;
     html+=`<h2><span class="dot" style="background:${s.color}"></span>${esc(s.name)}</h2>`;
     for(const f of [...new Set(inS.map(c=>c.function))]){
-      html+=`<h3>${esc(f)}</h3><div class="grid">`+inS.filter(c=>c.function==f).map(c=>`<div class="c" style="--col:${s.color}"><b>${esc(c.part)}</b>${c.description?`<p>${esc(c.description)}</p>`:''}<small>${esc(c.position||'Ikke placeret')}${c.quantity!=null?' · '+c.quantity+' stk':''}${c.notes?' · '+esc(c.notes):''}</small></div>`).join('')+'</div>';
+      html+=`<h3>${esc(f)}</h3><div class="grid">`+inS.filter(c=>c.function==f).map(c=>`<div class="c" style="--col:${s.color}"><b>${esc(c.part)}</b>${c.description?`<p>${esc(c.description)}</p>`:''}<small>${esc(c.position||'Ikke placeret')}${c.quantity!=null?' · '+c.quantity+' stk':''}${c.notes?' · '+esc(c.notes):''}${dsList(c).length?` · <a href="${esc(dsList(c)[0].url)}" target="_blank" rel="noopener">📄 Datablad</a>`:''}</small></div>`).join('')+'</div>';
     }
   }
   $('lib').innerHTML=html||'<p class="count">Ingen resultater.</p>';
@@ -122,7 +128,7 @@ $('wall').onclick=e=>{
   const b=e.target.closest('[data-id]'); if(!b) return;
   const c=comps.find(x=>x.id==b.dataset.id), s=ser(c.series), d=$('dlg');
   d.style.setProperty('--col',s.color);
-  d.innerHTML=`<h2>${esc(c.part)}</h2><p>${esc(c.description)}</p><p class="m">${esc(s.name)} · ${esc(c.function)}</p><p class="m">📍 ${esc(c.position)}</p>${c.quantity!=null?`<p class="m">Antal: ${c.quantity}</p>`:''}${c.notes?`<p class="m">${esc(c.notes)}</p>`:''}<button>Luk</button>`;
+  d.innerHTML=`<h2>${esc(c.part)}</h2><p>${esc(c.description)}</p><p class="m">${esc(s.name)} · ${esc(c.function)}</p><p class="m">📍 ${esc(c.position)}</p>${c.quantity!=null?`<p class="m">Antal: ${c.quantity}</p>`:''}${c.notes?`<p class="m">${esc(c.notes)}</p>`:''}<div class="ds">${dsLinks(c)}</div><button>Luk</button>`;
   d.showModal();
 };
 $('dlg').onclick=e=>{if(e.target.tagName=='BUTTON'||e.target==$('dlg'))$('dlg').close()};

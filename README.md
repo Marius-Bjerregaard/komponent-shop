@@ -40,5 +40,8 @@ REST: `GET /api/components?q=&series=&function=`, `POST/PATCH/DELETE` kræver to
 ## Kode
 `core.js` er al logikken (datamodel, søgning, MCP, REST) og bruges af både `server.js` (Node/Docker) og `src/worker.js` (Cloudflare).
 
+## Datablade
+Datablade (og senere footprints) ligger i repoet [komponent-datablade](https://github.com/Marius-Bjerregaard/komponent-datablade) og hentes direkte fra GitHub Pages. `datablade.json` her er partnummer → links og laves med `npm run opdater-datablade`, når der er kommet nye datablade i det repo. Et link sat direkte på en komponent (`datasheet` via `update_component`) vinder; en tom streng går tilbage til listen. Uden datablad vises et Google-søgelink.
+
 ## Reolbilleder
 Billederne i `billeder/` hedder `NN - Indhold.heic`. Nummeret følger reolernes rækkefølge (venstre mod højre, øverst før nederst). Ret det efter behov, kør `./sync-billeder.sh`, commit og push (og `npm run deploy`, hvis Cloudflare ikke deployer automatisk).

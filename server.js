@@ -15,6 +15,7 @@ const PUBLIC = path.join(__dirname, 'public');
 
 // ---------- data ----------
 const seed = JSON.parse(fs.readFileSync(path.join(__dirname, 'seed.json'), 'utf8'));
+const datasheets = JSON.parse(fs.readFileSync(path.join(__dirname, 'datablade.json'), 'utf8'));
 fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(DB_FILE)) fs.copyFileSync(path.join(__dirname, 'seed.json'), DB_FILE);
 function save(db) {
@@ -27,14 +28,14 @@ function listShelves() {
 }
 const lib = createLibrary({
   db: JSON.parse(fs.readFileSync(DB_FILE, 'utf8')),
-  save, seed, listShelves,
+  save, seed, listShelves, datasheets,
   backup: (_db, version) => fs.copyFileSync(DB_FILE, DB_FILE + '.before-v' + version),
 });
 if (lib.migrate()) console.log('Database migreret til layout v' + seed.layoutVersion);
 
 // ---------- HTTP ----------
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
-  '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml' };
+  '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml', '.pdf': 'application/pdf' };
 const readBody = req => () => new Promise((ok, bad) => {
   let b = ''; req.on('data', d => b += d);
   req.on('end', () => { try { ok(b ? JSON.parse(b) : {}); } catch (e) { bad(e); } });
