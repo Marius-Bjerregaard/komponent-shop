@@ -2,7 +2,24 @@
 
 Søgbart bibliotek over komponenterne i reolerne, delt i **serier** → **funktioner**. Kan lægges på hjemskærmen på iPhone/iPad (Del → Føj til hjemmeskærm).
 
-## Kør på Cloudflare (anbefalet)
+## Hovedsiden: GitHub Pages
+Siden ligger på **https://marius-bjerregaard.github.io/komponent-shop/** og bygges ud fra `komponenter.json` i dette repo. Den virker uden server, database eller eget domæne.
+
+### Ret komponenter
+Alle data ligger i `komponenter.json`, én komponent pr. linje:
+```json
+{"id":330,"part":"LM7805","series":"regulators","function":"Positive regulatorer","description":"5V 1,5A spændingsregulator","cabinet":"tom-top","row":1,"col":4,"location":"","quantity":null,"notes":"","datasheet":""}
+```
+- Ny komponent: tilføj en linje med et nyt, unikt `id` (højeste + 1).
+- Flyt: ret `cabinet`, `row` og `col` (række/skuffe fra øverst/venstre, 1-baseret). Skuffen skal være tom.
+- `datasheet`: valgfrit https-link; ellers bruges `datablade.json`.
+
+Arbejdsgang: lav en branch, ret filen, og åbn en pull request. GitHub tjekker automatisk, at filen hænger sammen (ukendte serier/reoler, optagne skuffer, dubletter). Når den merges til `main`, er siden opdateret efter ca. et minut. Lokalt kan du tjekke med `npm run tjek` (bygger til `dist/`).
+
+## Kør med server (Cloudflare eller Docker)
+Server-udgaven har samme side plus REST-API og MCP, så Claude kan rette direkte. Den har sin egen database og synkroniserer ikke med `komponenter.json`.
+
+### Cloudflare
 Siden, REST-API'et og MCP-serveren kører som én Cloudflare Worker (`src/worker.js`). Databasen ligger i et Durable Object med egen SQLite, og der er ingen hjemmeserver eller tunnel. Gratis-planen er nok.
 
 Første gang:
